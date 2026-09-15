@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeOS Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13" defer></script>
+    <script src="overview.js?v=13" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+    <style>
+        .overview-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 20px;
+        }
+        .overview-grid th, .overview-grid td {
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+            padding: 4px;
+            white-space: nowrap;
+        }
+        .overview-grid th {
+            font-weight: 600;
+        }
+        .overview-grid td:first-child, .overview-grid th:first-child {
+            text-align: left;
+            padding-left: 10px;
+            position: sticky;
+            left: 0;
+            background: var(--bg-color);
+            z-index: 2;
+        }
+        .overview-grid td:last-child, .overview-grid th:last-child {
+            text-align: left;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        .week-1 { background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(139, 92, 246, 0.05)); color: #c4b5fd; text-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+        .week-2 { background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.05)); color: #93c5fd; text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .week-3 { background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.05)); color: #6ee7b7; text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .week-4 { background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(236, 72, 153, 0.05)); color: #f9a8d4; text-shadow: 0 0 10px rgba(236, 72, 153, 0.5); }
+        .week-5 { background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(14, 165, 233, 0.05)); color: #7dd3fc; text-shadow: 0 0 10px rgba(14, 165, 233, 0.5); }
+        
+        .day-col { width: 24px; min-width: 24px; }
+        .habit-name-col { width: 180px; min-width: 180px; }
+        .analysis-col { width: 150px; min-width: 150px; }
+        
+        .overview-cb {
+            width: 12px; height: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            display: inline-block;
+            border-radius: 2px;
+            cursor: default;
+        }
+        .overview-cb.checked {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+            position: relative;
+        }
+        
+        .analysis-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+            width: 60px;
+        }
+        .analysis-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-light);
+        }
+        
+        .stat-row { font-size: 10px; color: rgba(255,255,255,0.6); }
+        .stat-row td { padding: 2px 4px; border-top: none; border-bottom: none; }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--panel-border);
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .header-stats {
+            display: flex; gap: 20px;
+            background: rgba(255,255,255,0.02);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+        }
+        .h-stat { display: flex; flex-direction: column; align-items: center; }
+        .h-stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .h-stat-val { font-size: 18px; font-weight: 700; color: #fff; }
+    </style>
+</head>
+<body class="fade-in">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px; flex-wrap:wrap; gap:20px;">
+            <div>
+                <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin:0 0 5px 0;" data-i18n="overview_title">- Habit Tracker Overview -</h1>
+                <div style="font-size: 14px; color: var(--text-muted);" id="month-title">Current Month</div>
+            </div>
+            
+            <div class="header-stats">
+                <div class="h-stat">
+                    <span class="h-stat-label" data-i18n="number_of_habits">Number of habits</span>
+                    <span class="h-stat-val" id="stat-total-habits">0</span>
+                </div>
+                <div class="h-stat">
+                    <span class="h-stat-label" data-i18n="completed_habits">Completed habits</span>
+                    <span class="h-stat-val" id="stat-completed-habits">0</span>
+                </div>
+                <div class="h-stat">
+                    <span class="h-stat-label" data-i18n="progress">Progress</span>
+                    <div class="analysis-bar-container" style="width: 100px; margin: 5px 0 0 0; height:10px;"><div class="analysis-bar-fill" id="stat-progress-bar" style="width:0%;"></div></div>
+                </div>
+                <div class="h-stat">
+                    <span class="h-stat-label" data-i18n="progress_pct">Progress in %</span>
+                    <span class="h-stat-val" id="stat-progress-pct">0%</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="table-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin: 0; font-size:16px;" data-i18n="my_habits">My Habits</h3>
+                <button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('habit-modal').classList.add('active')" data-i18n="add_new_habit">+ Add Habit</button>
+            </div>
+            <div style="overflow-x: auto; padding-bottom:10px;">
+                <table class="overview-grid" id="habits-grid">
+                    <!-- Generated by JS -->
+                </table>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h3 style="margin: 0 0 15px 0; font-size:16px;" data-i18n="mental_state">Mental State</h3>
+            <div style="overflow-x: auto; padding-bottom:10px;">
+                <table class="overview-grid" id="mental-grid">
+                    <!-- Generated by JS -->
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add Habit Modal -->
+    <div class="modal-overlay" id="habit-modal">
+        <div class="modal glass-panel" style="width:90%; max-width:400px; padding:30px;">
+            <h3 id="habit-modal-title" data-i18n="add_new_habit" style="margin-bottom:20px;">Add New Habit</h3>
+            <form id="habit-form">
+                <input type="hidden" id="edit-habit-id" value="">
+                <input type="text" id="habit-name" required placeholder="Habit name" data-i18n="habit_name_placeholder" class="qp-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:15px;">
+                <select id="habit-category" class="qp-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.5); color:#fff; margin-bottom: 20px;">
+                    <option value="other" data-i18n="cat_other">Other</option>
+                    <option value="health" data-i18n="cat_health">Health</option>
+                    <option value="productivity" data-i18n="cat_prod">Productivity</option>
+                    <option value="mindfulness" data-i18n="cat_mind">Mindfulness</option>
+                    <option value="education" data-i18n="cat_edu">Education</option>
+                </select>
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:10px; font-size:12px; color:var(--text-muted);">Icon</label>
+                    <div id="emoji-picker" style="display:flex; flex-wrap:wrap; gap:10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
+                        <!-- Emojis populated by JS -->
+                    </div>
+                    <input type="hidden" id="habit-emoji" value="ğŸ“Œ">
+                </div>
+                <button type="submit" class="btn" style="width:100%; margin-bottom:10px;" data-i18n="save_habit">Save Habit</button>
+                <button type="button" class="btn" style="width:100%; background:transparent; border:1px solid rgba(255,255,255,0.2);" onclick="document.getElementById('habit-modal').classList.remove('active')" data-i18n="cancel">Cancel</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

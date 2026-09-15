@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeOS Nutrition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13"></script>
+    <script src="nutrition.js?v=13" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <header style="margin-bottom: 30px; display:flex; justify-content: space-between; align-items:center;">
+            <div>
+                <h1 style="font-size:32px; font-weight:800; color:#fff;" data-i18n="nutrition">Nutrition</h1>
+                <div style="font-size:14px; color:var(--text-muted);">Macros & Meal Tracking</div>
+            </div>
+            <button class="btn" onclick="openModal('meal-modal')">+ Log Meal</button>
+        </header>
+
+        <main class="view-section active responsive-row" style="flex-direction: column;">
+            
+            <!-- Daily Macros Overview -->
+            <div class="glass-panel" style="padding: 30px; margin-bottom: 25px;">
+                <h3 style="margin-bottom: 20px;">Daily Macro Goals</h3>
+                
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <!-- Calories -->
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Calories</div>
+                        <div style="font-size:24px; font-weight:700; color:#fff; margin:5px 0;" id="macro-cal">0 / 2500</div>
+                        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="prog-cal" style="width:0%; height:100%; background:var(--accent);"></div>
+                        </div>
+                    </div>
+                    <!-- Protein -->
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Protein (g)</div>
+                        <div style="font-size:24px; font-weight:700; color:#fff; margin:5px 0;" id="macro-pro">0 / 150</div>
+                        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="prog-pro" style="width:0%; height:100%; background:#ef4444;"></div>
+                        </div>
+                    </div>
+                    <!-- Carbs -->
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Carbs (g)</div>
+                        <div style="font-size:24px; font-weight:700; color:#fff; margin:5px 0;" id="macro-carb">0 / 250</div>
+                        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="prog-carb" style="width:0%; height:100%; background:#3b82f6;"></div>
+                        </div>
+                    </div>
+                    <!-- Fats -->
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Fats (g)</div>
+                        <div style="font-size:24px; font-weight:700; color:#fff; margin:5px 0;" id="macro-fat">0 / 80</div>
+                        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="prog-fat" style="width:0%; height:100%; background:#f59e0b;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 25px; flex-wrap: wrap;">
+                
+                <!-- Meals List -->
+                <div class="glass-panel" style="flex: 2; padding: 25px; min-width: 300px;">
+                    <h3 style="margin-bottom: 20px;">Today's Meals</h3>
+                    <div id="meals-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+                
+                <!-- Micro Tracker (Water & Weight) -->
+                <div class="glass-panel" style="flex: 1; padding: 25px; min-width: 250px;">
+                    <h3 style="margin-bottom: 20px;">Tracking</h3>
+                    
+                    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <span style="font-weight:600;">Water (Glasses)</span>
+                            <span id="water-count" style="color:var(--accent-light); font-weight:700;">0</span>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn" style="flex:1; font-size:13px;" onclick="addWater(true)">+ Add</button>
+                            <button class="btn btn-danger" style="flex:1; font-size:13px;" onclick="addWater(false)">- Remove</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <span style="font-weight:600;">Current Weight</span>
+                            <span id="weight-display" style="color:var(--text-muted);">-- kg</span>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <input type="number" id="input-weight" class="input-field" placeholder="e.g. 75.5" style="flex:1;">
+                            <button class="btn" onclick="saveWeight()">Save</button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Modal for Logging Meal -->
+    <div class="modal-overlay" id="meal-modal">
+        <div class="modal">
+            <h2>Log Meal</h2>
+            <div class="input-group">
+                <label>Meal Type</label>
+                <select id="meal-type" class="input-field">
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Food Item</label>
+                <input type="text" id="meal-name" class="input-field" placeholder="e.g. Chicken breast & rice">
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="input-group">
+                    <label>Calories</label>
+                    <input type="number" id="meal-cal" class="input-field" value="0">
+                </div>
+                <div class="input-group">
+                    <label>Protein (g)</label>
+                    <input type="number" id="meal-pro" class="input-field" value="0">
+                </div>
+                <div class="input-group">
+                    <label>Carbs (g)</label>
+                    <input type="number" id="meal-carb" class="input-field" value="0">
+                </div>
+                <div class="input-group">
+                    <label>Fats (g)</label>
+                    <input type="number" id="meal-fat" class="input-field" value="0">
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn" style="flex:1;" onclick="saveMeal()">Save</button>
+                <button class="btn btn-danger" style="flex:1;" onclick="closeModal('meal-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

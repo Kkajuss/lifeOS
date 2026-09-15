@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÄŸÅ¸Å’Å¸ LifeOS - Habit Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=13"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js?v=13"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <!-- Sidebar -->
+        <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <!-- Dashboard Top Header Style as per Screenshot -->
+        <header class="top-stats" style="margin-bottom: 20px; position:relative;">
+            <div style="flex:1;">
+                <h1 style="font-size:28px; font-weight:700; color:#fff;" id="current-month-display">January</h1>
+                <div style="font-size:13px; color:var(--text-muted);">- Habit Tracker -</div>
+            </div>
+            
+            <button onclick="shareCard()" style="position:absolute; right:0; top:0; background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                Share
+            </button>
+            <div style="display:flex; gap:15px; margin-top:20px;">
+                <div class="stat-box glass-panel" style="flex:0.5; padding:15px; background:rgba(30,41,59,0.3);">
+                    <div class="stat-label" data-i18n="number_of_habits">Number of habits</div>
+                    <div class="stat-value" id="stat-total-habits" style="font-size:18px;">0</div>
+                </div>
+                <div class="stat-box glass-panel" style="flex:0.5; padding:15px; background:rgba(30,41,59,0.3);">
+                    <div class="stat-label" data-i18n="completed_habits">Completed habits</div>
+                    <div class="stat-value" id="stat-completed-habits" style="font-size:18px;">0</div>
+                </div>
+                <div class="stat-box glass-panel" style="flex:1; padding:15px; background:rgba(30,41,59,0.3);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                        <div style="flex:1;">
+                            <div class="stat-label" data-i18n="progress">Progress</div>
+                            <div class="progress-bar-container" style="margin-top:4px; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+                                <div class="progress-bar-fill" id="stat-progress-bar" style="width: 0%; height:100%; background: #fbbf24; box-shadow:0 0 10px #fbbf24;"></div>
+                            </div>
+                        </div>
+                        <div style="text-align:right; margin-left:20px;">
+                            <div class="stat-label">Progress in %</div>
+                            <div class="stat-value" style="font-size:14px; margin-top:4px;" id="stat-progress-text">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- FULL PAGE HABIT SPREADSHEET -->
+        <main class="view-section active" style="flex-direction: column; display:flex; gap: 24px;">
+            
+            <!-- Habits Spreadsheet (Moved to Top) -->
+            <div style="background:var(--panel-bg); border-radius:12px; padding:15px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-left:5px; padding-right:5px;">
+                    <h3 style="color:#fff; font-size:16px; margin:0;"><span data-i18n="my_habits">My Habits</span></h3>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <select id="habit-category-filter" class="qp-input" style="width:auto; padding: 4px 10px; font-size: 12px; border-radius: 8px;">
+                            <option value="all" data-i18n="all">All</option>
+                            <option value="other" data-i18n="cat_other">Other</option>
+                            <option value="health" data-i18n="cat_health">Health</option>
+                            <option value="productivity" data-i18n="cat_prod">Productivity</option>
+                            <option value="mindfulness" data-i18n="cat_mind">KiÅŸisel GeliÅŸim</option>
+                            <option value="education" data-i18n="cat_edu">EÄŸitim</option>
+                        </select>
+                        <button class="qp-btn" onclick="window.openModal('habit-modal')" style="padding: 4px 12px; font-size: 12px; display:flex; align-items:center; gap:4px; border-radius:8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Add
+                        </button>
+                    </div>
+                </div>
+                <div style="width: 100%; overflow-x: auto; margin-top: 20px; padding-bottom: 10px;"><div id="habits-spreadsheet-grid" class="qp-grid-container"></div></div>
+            </div>
+            
+            <!-- Analytics Row -->
+            <div class="responsive-row" style="display:flex; gap: 15px;">
+                
+                <!-- Habit Trend Chart -->
+                <div style="flex: 2; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:12px; padding: 20px; min-height:350px; display:flex; flex-direction:column; box-shadow: 0 8px 16px rgba(0,0,0,0.2);">
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            <span data-i18n="daily_completion_trend">Daily Completion Trend</span>
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 5px 0 0 0;"><span data-i18n="daily_completion_desc">Visualizes your overall habit success rate day by day throughout the month.</span></p>
+                    </div>
+                    <div style="flex:1; position:relative;">
+                        <canvas id="habitTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Analysis Summary Panels -->
+                <div style="flex: 1; display:flex; flex-direction:column; gap: 15px;">
+                    <!-- Habit Analysis -->
+                    <div class="analysis-panel glass-panel" style="flex:1; overflow-y:auto; background:var(--panel-bg); border-color:var(--border-color); border-radius:12px; padding:15px;">
+                        <h3 style="text-align:center; font-size:14px; margin-bottom:15px;" data-i18n="analysis">Analysis</h3>
+                        <div class="analysis-list" id="analysis-list" style="margin-bottom: 20px;"></div>
+                        <h3 style="text-align:center; margin-top:25px; margin-bottom: 10px; font-size:12px; text-transform:uppercase; color:var(--accent);" data-i18n="top_10_habits">Top 10 Habits</h3>
+                        <table class="qp-table" style="width:100%; border:none; font-size:12px;" id="top-habits-table">
+                            <tbody id="top-habits-list"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Mental Analysis -->
+                    <div class="analysis-panel glass-panel" style="flex:1; overflow-y:auto; background:var(--panel-bg); border-color:var(--border-color); border-radius:12px; padding:15px;">
+                        <h3 style="text-align:center; font-size:14px; margin-bottom:15px;" data-i18n="mental_state_analysis">Mental State Analysis</h3>
+                        <div class="analysis-list" id="mental-analysis-list"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mental Spreadsheet -->
+            <div style="background:var(--panel-bg); border-radius:12px; padding:15px; border:1px solid var(--border-color);">
+                <h3 style="color:#fff; font-size:16px; margin-bottom:15px; padding-left:5px;"><span data-i18n="mental_state">Mental State</span></h3>
+                <div style="width: 100%; overflow-x: auto; margin-top: 20px; padding-bottom: 10px;"><div id="habits-spreadsheet-grid" class="qp-grid-container"></div></div>
+            </div>
+
+            <!-- Mental State Double Line Chart -->
+            <div style="background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; padding: 20px; min-height:350px; display:flex; flex-direction:column; margin-bottom:40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                            <span data-i18n="mental_state_analysis">Mental State Analysis</span>
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 5px 0 0 0;"><span data-i18n="mental_state_desc">Compare your mood and motivation levels to find patterns in your productivity.</span></p>
+                    </div>
+                </div>
+                <div style="flex:1; position:relative;">
+                    <canvas id="mentalChart"></canvas>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Floating Edit Button at Bottom Right -->
+        <button id="reorder-habits-btn" class="qp-btn-cancel" style="position:fixed; bottom:20px; right:20px; z-index:999; padding: 12px 20px; font-size: 14px; display:flex; align-items:center; gap:8px; border-radius:50px; border:1px solid rgba(255,255,255,0.2); color:#fff; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+            Edit
+        </button>
+    </div>
+
+    <!-- Sleek Action Modal -->
+    <div id="action-modal" style="display:none; justify-content:center; align-items:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:9999; opacity:0; transition: opacity 0.3s ease;">
+        <div class="action-sheet glass-panel" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); padding:0; border-radius:16px; width:100%; max-width:300px; text-align:left; transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                <h2 style="margin:0; color:var(--text-muted); font-size:13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;" id="action-modal-title">Select Action</h2>
+            </div>
+            
+            <div id="action-modal-stats" style="display:none; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-around; align-items:center; background:rgba(0,0,0,0.2);">
+                <div style="text-align:center;">
+                    <div style="font-size:24px; font-weight:800; color:var(--accent); display:flex; align-items:center; justify-content:center; gap:4px;"><span id="action-streak-current">0</span> <span style="font-size:16px;">ğŸ”¥</span></div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Current Streak</div>
+                </div>
+                <div style="width:1px; height:30px; background:rgba(255,255,255,0.1);"></div>
+                <div style="text-align:center;">
+                    <div style="font-size:24px; font-weight:800; color:#fff;" id="action-streak-best">0</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Best Streak</div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column;">
+                <button id="action-check-all" class="action-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                    <span>Check All</span>
+                </button>
+                <button id="action-uncheck-all" class="action-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                    <span>Uncheck All</span>
+                </button>
+                <div id="action-delete-container"></div>
+            </div>
+            <div style="padding: 8px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05);">
+                <button id="action-cancel" class="action-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Modal -->
+    <div id="journal-modal" style="display:none; justify-content:center; align-items:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:9999; opacity:0; transition: opacity 0.3s ease;">
+        <div class="action-sheet glass-panel" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); padding:20px; border-radius:16px; width:100%; max-width:300px; text-align:left; transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+            <h3 style="margin-top:0; color:#fff; font-size:16px; font-weight:600;" id="journal-modal-title">Daily Note</h3>
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:15px;" id="journal-modal-date"></div>
+            <textarea id="journal-textarea" placeholder="How did it go today?" class="qp-input" style="min-height: 100px; resize: none; margin-bottom: 15px; width:100%; box-sizing:border-box;"></textarea>
+            <div style="display:flex; gap:10px;">
+                <button class="qp-btn-cancel" id="journal-btn-cancel" style="flex:1; padding:12px; border-radius:10px; cursor:pointer;" data-i18n="cancel">Cancel</button>
+                <button class="qp-btn" id="journal-btn-save" style="flex:1; padding:12px; border-radius:10px; border:none; color:#fff; cursor:pointer; font-weight:600;" data-i18n="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mental Emoji Picker Modal -->
+    <div id="mental-modal" style="display:none; justify-content:center; align-items:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); backdrop-filter:blur(3px); z-index:9999; opacity:0; transition: opacity 0.2s ease;">
+        <div class="glass-panel" style="background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.1); padding:20px; border-radius:24px; text-align:center; transform: scale(0.9); transition: all 0.2s; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+            <h3 style="margin-top:0; color:var(--text-main); font-size:15px; font-weight:600; margin-bottom:20px;" id="mental-modal-title">Select Emoji</h3>
+            <div style="display:flex; gap:15px; justify-content:center; align-items:center; margin-bottom:20px;">
+                <span class="m-emoji" data-val="1" style="font-size:32px; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='none'">ğŸ˜</span>
+                <span class="m-emoji" data-val="2" style="font-size:32px; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='none'">ğŸ˜•</span>
+                <span class="m-emoji" data-val="3" style="font-size:32px; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='none'">ğŸ˜</span>
+                <span class="m-emoji" data-val="4" style="font-size:32px; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='none'">ğŸ™‚</span>
+                <span class="m-emoji" data-val="5" style="font-size:32px; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='none'">ğŸ¤©</span>
+            </div>
+            <button class="qp-btn-cancel" onclick="closeMentalModal()" style="width:100%; padding:10px; border-radius:12px; cursor:pointer;" data-i18n="cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Add Habit Modal -->
+    <div class="modal" id="habit-modal">
+        <div class="modal-content">
+            <h3 id="habit-modal-title" data-i18n="add_new_habit">Add New Habit</h3>
+            <form id="habit-form">
+                <input type="hidden" id="edit-habit-id" value="">
+                <input type="text" id="habit-name" required placeholder="Habit name (e.g., Read 10 pages)" data-i18n="habit_name_placeholder" class="qp-input">
+                <select id="habit-category" class="qp-input" style="margin-bottom: 20px;">
+                    <option value="other" data-i18n="cat_other">DiÄŸer</option>
+                    <option value="health" data-i18n="cat_health">SaÄŸlÄ±k</option>
+                    <option value="productivity" data-i18n="cat_prod">Ãœretkenlik</option>
+                    <option value="mindfulness" data-i18n="cat_mind">KiÅŸisel GeliÅŸim</option>
+                    <option value="education" data-i18n="cat_edu">EÄŸitim</option>
+                </select>
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; display: block;">Select Emoji</label>
+                    <div id="emoji-picker-index" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <!-- Emojis populated by JS -->
+                    </div>
+                    <input type="hidden" id="habit-emoji" value="ğŸ“">
+                </div>
+                <button type="submit" class="qp-btn">Add to Tracker</button>
+                <button type="button" class="qp-btn qp-btn-cancel" onclick="closeModal('habit-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js?v=13"></script>
+    <script src="habits.js?v=13"></script>
+</body>
+</html>
+
+
+

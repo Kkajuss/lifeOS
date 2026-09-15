@@ -1,0 +1,1 @@
+$files = Get-ChildItem -Path C:\Users\61fur\.gemini\antigravity-ide\scratch\habit-tracker\*.html; foreach ($f in $files) { $content = Get-Content $f.FullName; $content = $content -replace "\.js(\?v=\d+)?`"", ".js?v=5`""; $content = $content -replace "\.css(\?v=\d+)?`"", ".css?v=5`""; Set-Content -Path $f.FullName -Value $content }

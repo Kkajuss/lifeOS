@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS - Coming Soon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="i18n.js?v=13"></script>
+    <script src="shared.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <main class="view-section active" style="flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.5));">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <h2 style="font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 10px;">Coming Soon</h2>
+            <p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">
+                This module is currently under construction. Please check back later.
+            </p>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if(window.updateTopBar) window.updateTopBar();
+        });
+    </script>
+</body>
+</html>

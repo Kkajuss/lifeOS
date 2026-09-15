@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeOS Fitness</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13"></script>
+    <script src="fitness.js?v=13" defer></script>
+    <style>
+        /* Volume colors for SVGs */
+        .vol-low { fill: rgba(239, 68, 68, 0.4) !important; stroke: #ef4444 !important; } /* Red */
+        .vol-med { fill: rgba(245, 158, 11, 0.4) !important; stroke: #f59e0b !important; } /* Yellow */
+        .vol-high { fill: rgba(16, 185, 129, 0.4) !important; stroke: #10b981 !important; } /* Green */
+
+        
+        .stat-card {
+            background: rgba(30,41,59,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-card h4 { margin-bottom: 5px; color: var(--text-muted); font-size: 12px; text-transform: uppercase; }
+        .stat-card .val { font-size: 24px; font-weight: 700; color: #fff; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <header style="margin-bottom: 30px; display:flex; justify-content: space-between; align-items:center;">
+            <div>
+                <h1 style="font-size:32px; font-weight:800; color:#fff;" data-i18n="fitness">Fitness</h1>
+                <div style="font-size:14px; color:var(--text-muted);">Muscle Volume & PR Tracking</div>
+            </div>
+            <button class="btn" onclick="openModal('workout-modal')">+ Log Workout</button>
+        </header>
+
+        <main class="view-section active responsive-row" style="flex-direction: row; gap: 20px; align-items: flex-start;">
+            
+            <!-- Interactive Body Map -->
+            <div class="glass-panel" style="flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                <h3 style="margin-bottom: 20px;">Interactive Muscle Map</h3>
+                
+                <div style="display:flex; flex-wrap:wrap; gap: 20px; justify-content: center; width:100%; margin-bottom: 20px;">
+                    <!-- INTERACTIVE IMAGE MAP -->
+                    <div id="body-map-front-container" style="position:relative; width: 100%; max-width: 300px; filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));">
+                        <img src="anatomy_greyscale.png" style="width: 100%; height: auto; display: block; border-radius: 12px; pointer-events: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" id="body-map-front" style="position: absolute; top:0; left:0; width:100%; height:100%;">
+                            <g stroke="none" fill="transparent" class="svg-hitboxes">
+                                <!-- Chest -->
+                                <ellipse cx="40" cy="28" rx="8" ry="6" class="muscle-group front-chest muscle-hitbox" data-muscle="Chest" />
+                                <ellipse cx="60" cy="28" rx="8" ry="6" class="muscle-group front-chest muscle-hitbox" data-muscle="Chest" />
+                                <!-- Core -->
+                                <rect x="42" y="35" width="16" height="18" rx="2" class="muscle-group front-core muscle-hitbox" data-muscle="Core" />
+                                <!-- Shoulders -->
+                                <ellipse cx="25" cy="27" rx="6" ry="8" class="muscle-group front-shoulders muscle-hitbox" data-muscle="Front Deltoids" />
+                                <ellipse cx="75" cy="27" rx="6" ry="8" class="muscle-group front-shoulders muscle-hitbox" data-muscle="Front Deltoids" />
+                                <!-- Biceps -->
+                                <ellipse cx="20" cy="42" rx="4" ry="8" class="muscle-group front-biceps muscle-hitbox" data-muscle="Biceps" />
+                                <ellipse cx="80" cy="42" rx="4" ry="8" class="muscle-group front-biceps muscle-hitbox" data-muscle="Biceps" />
+                                <!-- Forearms -->
+                                <ellipse cx="15" cy="58" rx="4" ry="10" class="muscle-group front-forearms muscle-hitbox" data-muscle="Forearms" />
+                                <ellipse cx="85" cy="58" rx="4" ry="10" class="muscle-group front-forearms muscle-hitbox" data-muscle="Forearms" />
+                                <!-- Quads -->
+                                <ellipse cx="40" cy="65" rx="6" ry="15" class="muscle-group front-quads muscle-hitbox" data-muscle="Quads" />
+                                <ellipse cx="60" cy="65" rx="6" ry="15" class="muscle-group front-quads muscle-hitbox" data-muscle="Quads" />
+                                <!-- Calves -->
+                                <ellipse cx="40" cy="85" rx="4" ry="10" class="muscle-group front-calves muscle-hitbox" data-muscle="Calves" />
+                                <ellipse cx="60" cy="85" rx="4" ry="10" class="muscle-group front-calves muscle-hitbox" data-muscle="Calves" />
+                            </g>
+                        </svg>
+                        <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:5px; font-weight:700;">INTERACTIVE MODEL</div>
+                    </div>
+                </div>
+
+                <!-- Agirsaglam Style Legend -->
+                <div style="display:flex; flex-wrap:wrap; gap: 15px; margin-top: 10px; font-size: 13px; color: #fff; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); width:100%; justify-content:center;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:16px; height:16px; background:#dc2626; border-radius:4px; box-shadow:0 0 10px rgba(220,38,38,0.5);"></div> 
+                        <b>Target (Primary)</b>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:16px; height:16px; background:#f59e0b; border-radius:4px; box-shadow:0 0 10px rgba(245,158,11,0.5);"></div> 
+                        <b>Synergist (Secondary)</b>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:16px; height:16px; background:#3b82f6; border-radius:4px; box-shadow:0 0 10px rgba(59,130,246,0.5);"></div> 
+                        <b>Stabilizer</b>
+                    </div>
+                </div>
+                
+                <div style="display:flex; gap: 10px; margin-top: 20px; font-size: 12px; color: var(--text-muted);">
+                    <div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background:rgba(239, 68, 68, 0.6); border-radius:3px;"></div> Under-worked</div>
+                    <div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background:rgba(245, 158, 11, 0.6); border-radius:3px;"></div> Moderate</div>
+                    <div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background:rgba(16, 185, 129, 0.6); border-radius:3px;"></div> Optimal</div>
+                </div>
+            </div>
+            
+            <!-- Details Panel -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Exercise Explorer -->
+                <div class="glass-panel" id="exercise-explorer-panel" style="padding: 24px; min-height: 150px; background: rgba(30,41,59,0.8);">
+                    <h3 style="font-size: 20px; color: #fff; margin-bottom: 15px; display:flex; align-items:center; gap:8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        Exercise Explorer
+                    </h3>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <select id="exercise-select" class="input-field" onchange="window.selectExercise(this.value)">
+                            <option value="">Select an exercise...</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+
+                    <div id="exercise-details" style="display:none;">
+                        <h4 id="ex-title" style="font-size:18px; color:var(--accent-light); margin-bottom:10px;">Bench Press</h4>
+                        <div style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom: 15px;" id="ex-desc">
+                            Instructions go here...
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                            <h5 style="color:#fff; margin-bottom:5px; font-size:13px;">Form Tips</h5>
+                            <ul id="ex-tips" style="margin:0; padding-left:20px; font-size:12px; color:var(--text-muted); line-height:1.5;">
+                                <li>Tip 1</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Muscle Info -->
+                <div class="glass-panel" id="muscle-info-panel" style="padding: 24px; min-height: 150px; background: rgba(30,41,59,0.8);">
+                    <h3 style="font-size: 24px; color: #fff; margin-bottom: 5px;" id="selected-muscle-name">Select a Muscle</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Hover or click on the map to see details.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="stat-card">
+                            <h4>This Month</h4>
+                            <div class="val" id="muscle-this-month">0 sets</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Last Month</h4>
+                            <div class="val" id="muscle-last-month">0 sets</div>
+                            <div id="muscle-trend" style="font-size:12px; color:#10b981; margin-top:5px;">+0%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Overall Stats -->
+                <div class="glass-panel" style="padding: 24px;">
+                    <h3 style="margin-bottom: 20px;">Weekly Overview</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="stat-card">
+                            <h4>Total Sets (Week)</h4>
+                            <div class="val" id="weekly-total-sets">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Recovery Score</h4>
+                            <div class="val" id="recovery-score" style="color: #10b981;">100%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- PPL Split -->
+                    <div style="margin-top: 20px;">
+                        <h4 style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">Push / Pull / Legs Split</h4>
+                        <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; background: rgba(255,255,255,0.1);">
+                            <div id="ppl-push" style="width: 33%; background: #3b82f6;" title="Push"></div>
+                            <div id="ppl-pull" style="width: 33%; background: #ef4444;" title="Pull"></div>
+                            <div id="ppl-legs" style="width: 34%; background: #10b981;" title="Legs"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Daily Workout Program & Smart Logger -->
+                <div class="glass-panel" style="padding: 24px;">
+                    <h3 style="margin-bottom: 20px;">Smart Workout Logger</h3>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <textarea id="smart-workout-input" class="input-field" rows="4" placeholder="Paste your workout text here... e.g. 'Push Day: Bench Press 4x10 100kg, Triceps 3x12'" style="resize:vertical;"></textarea>
+                    </div>
+                    <button class="btn" style="width:100%; justify-content:center; margin-bottom: 15px;" onclick="parseSmartWorkout()">Auto-Parse & Log</button>
+                    
+                    <div id="smart-log-results" style="margin-bottom:15px; max-height:150px; overflow-y:auto;"></div>
+
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;"></div>
+                    
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label>Today's Label</label>
+                        <input type="text" id="daily-program-input" class="input-field" placeholder="e.g. Push Day, Rest..." oninput="saveDailyProgram()">
+                    </div>
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" id="daily-program-done" onchange="saveDailyProgram()" style="width:20px; height:20px; cursor:pointer; accent-color: var(--accent);">
+                        <span style="color:#fff; font-size:15px;">Mark as completed today</span>
+                    </label>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Modal for Logging -->
+    <div class="modal-overlay" id="workout-modal">
+        <div class="modal">
+            <h2>Log Sets</h2>
+            <div class="input-group">
+                <label>Muscle Group</label>
+                <select id="log-muscle" class="input-field">
+                    <option value="Neck">Neck</option>
+                    <option value="Shoulders">Shoulders (Push)</option>
+                    <option value="Chest">Chest (Push)</option>
+                    <option value="Lats">Back / Lats (Pull)</option>
+                    <option value="Arms">Arms (Push/Pull)</option>
+                    <option value="Forearms">Forearms</option>
+                    <option value="Core">Core</option>
+                    <option value="Legs">Quads / Hamstrings (Legs)</option>
+                    <option value="Calves">Calves (Legs)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Sets Completed</label>
+                <input type="number" id="log-sets" class="input-field" value="3" min="1">
+            </div>
+            <div class="input-group">
+                <label>Top Weight (kg) / 1RM Calc</label>
+                <input type="number" id="log-weight" class="input-field" placeholder="e.g. 100">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn" style="flex:1;" onclick="saveWorkout(true)">Save</button>
+                <button class="btn btn-danger" style="flex:1;" onclick="saveWorkout(false)">Remove</button>
+            </div>
+            <button class="btn" style="width:100%; margin-top:10px; background: rgba(255,255,255,0.05); box-shadow: none;" onclick="closeModal('workout-modal')">Cancel</button>
+        </div>
+    </div>
+</body>
+</html>
