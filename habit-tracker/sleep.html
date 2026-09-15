@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÄŸÅ¸Å’Å¸ LifeOS - Sleep Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <!-- Sidebar -->
+        <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <header class="top-stats">
+            <div class="stat-box glass-panel" style="flex:0.5;">
+                <div class="stat-label" data-i18n="month">Month</div>
+                <div class="stat-value" id="current-month-display">January</div>
+            </div>
+            
+            <div class="stat-box glass-panel">
+                <div class="stat-label">Average Sleep (Hours)</div>
+                <div class="stat-value" id="avg-sleep">0</div>
+            </div>
+        </header>
+
+        <!-- SLEEP TRACKER VIEW -->
+        <main class="view-section active" style="flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+                <h2 style="font-size:24px; font-weight:700; text-shadow: 0 2px 5px rgba(0,0,0,0.5);" data-i18n="sleep_tracker">Sleep Tracker</h2>
+                <button class="add-btn" onclick="openModal('sleep-modal')">+ Log Sleep</button>
+            </div>
+
+            <!-- Line Chart -->
+            <div class="glass-panel" style="padding: 24px; flex:1; min-height:400px; display:flex; flex-direction:column; margin-bottom:24px;">
+                <h3 style="font-size:18px; margin-bottom:15px; color:#fff;">Sleep Duration Over Time</h3>
+                <div style="flex:1; position:relative;">
+                    <canvas id="sleepChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- List -->
+            <div class="glass-panel" style="padding: 24px;">
+                <h3 style="font-size:18px; margin-bottom:15px; color:#fff;">Recent Logs</h3>
+                <table class="qp-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; padding:12px;">Date</th>
+                            <th>Hours Slept</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sleep-table-body"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="sleep-modal">
+        <div class="modal-content">
+            <h3>Log Sleep</h3>
+            <form id="sleep-form">
+                <input type="date" id="sleep-date" required class="qp-input">
+                <input type="number" id="sleep-hours" required step="0.5" min="0" max="24" class="qp-input" placeholder="Hours (e.g., 7.5)">
+                <button type="submit" class="qp-btn">Save</button>
+                <button type="button" class="qp-btn qp-btn-cancel" onclick="closeModal('sleep-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13"></script>
+    <script src="sleep.js?v=13"></script>
+</body>
+</html>
+
