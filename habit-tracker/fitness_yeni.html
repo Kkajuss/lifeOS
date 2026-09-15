@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÄŸÅ¸Å’Å¸ LifeOS - Fitness & Anatomy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <!-- Sidebar -->
+        <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <header class="top-stats">
+            <div class="stat-box glass-panel" style="flex:0.5;">
+                <div class="stat-label" data-i18n="month">Month</div>
+                <div class="stat-value" id="current-month-display">January</div>
+            </div>
+        </header>
+
+        <!-- FITNESS VIEW -->
+        <main class="view-section active" style="flex-direction: column;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="spreadsheet-wrapper glass-panel" style="padding: 20px; min-height:300px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 15px;">
+                        <h3 style="font-size:16px;">Workout Log</h3>
+                        <button class="add-btn" onclick="openModal('fitness-modal')" style="padding:4px 10px; font-size:12px;">+ Add Set</button>
+                    </div>
+                    <table class="qp-table" style="width: 100%; font-size: 12px;">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left; padding:8px;">Exercise</th>
+                                <th style="padding:8px;">Sets</th>
+                                <th style="padding:8px;">Reps</th>
+                                <th style="padding:8px;">Weight</th>
+                                <th style="padding:8px;">Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fitness-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Body Measurements -->
+                <div class="spreadsheet-wrapper glass-panel" style="padding: 20px; min-height:300px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 15px;">
+                        <h3 style="font-size:16px;">Body Measurements</h3>
+                        <button class="add-btn" onclick="openModal('body-modal')" style="padding:4px 10px; font-size:12px;">+ Log</button>
+                    </div>
+                    <div style="overflow-x: auto; max-width: 100%;">
+                        <table class="qp-table" style="width: 100%; font-size: 11px; white-space: nowrap;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left; padding:8px;">Date</th>
+                                    <th style="padding:8px;">Weight (kg)</th>
+                                    <th style="padding:8px;">Fat (%)</th>
+                                    <th style="padding:8px;">Chest (cm)</th>
+                                    <th style="padding:8px;">Shoulders (cm)</th>
+                                    <th style="padding:8px;">Waist (cm)</th>
+                                    <th style="padding:8px;">Hips (cm)</th>
+                                    <th style="padding:8px;">Arms (cm)</th>
+                                    <th style="padding:8px;">Forearms (cm)</th>
+                                    <th style="padding:8px;">Legs (cm)</th>
+                                    <th style="padding:8px;">Calves (cm)</th>
+                                    <th style="padding:8px;">Neck (cm)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 20px;">
+                <!-- Anatomy Panel -->
+                <div class="anatomy-panel glass-panel" style="padding: 20px;">
+                    <h3 style="font-size:16px; margin-bottom:15px;">Anatomy Map</h3>
+                    <div class="anatomy-figures">
+                        <div class="anatomy-vector">
+                            <div style="text-align:center; font-size:11px; color:var(--text-muted); margin-bottom:5px; font-weight:600;">FRONT</div>
+                            <svg viewBox="0 0 100 200" class="anatomy-svg">
+                                <path d="M 40 30 Q 50 35 60 30 L 65 80 Q 50 90 35 80 Z" class="base-body"/>
+                                <path d="M 38 40 Q 50 50 62 40 L 58 55 Q 50 60 42 55 Z" class="muscle muscle-chest"/>
+                                <path d="M 32 32 Q 38 30 40 38 L 35 50 Q 28 45 32 32 Z" class="muscle muscle-shoulders"/>
+                                <path d="M 68 32 Q 62 30 60 38 L 65 50 Q 72 45 68 32 Z" class="muscle muscle-shoulders"/>
+                                <path d="M 28 50 Q 32 65 25 80 L 20 75 Q 22 60 28 50 Z" class="muscle muscle-arms"/>
+                                <path d="M 72 50 Q 68 65 75 80 L 80 75 Q 78 60 72 50 Z" class="muscle muscle-arms"/>
+                                <path d="M 42 60 Q 50 65 58 60 L 55 85 Q 50 90 45 85 Z" class="muscle muscle-core"/>
+                                <path d="M 40 90 Q 45 110 40 135 L 30 130 Q 35 110 40 90 Z" class="muscle muscle-legs"/>
+                                <path d="M 60 90 Q 55 110 60 135 L 70 130 Q 65 110 60 90 Z" class="muscle muscle-legs"/>
+                            </svg>
+                        </div>
+                        <div class="anatomy-vector">
+                            <div style="text-align:center; font-size:11px; color:var(--text-muted); margin-bottom:5px; font-weight:600;">BACK</div>
+                            <svg viewBox="0 0 100 200" class="anatomy-svg">
+                                <path d="M 40 30 Q 50 35 60 30 L 65 80 Q 50 90 35 80 Z" class="base-body"/>
+                                <path d="M 40 35 Q 50 45 60 35 L 65 70 C 55 60 45 60 35 70 Z" class="muscle muscle-back"/>
+                                <path d="M 32 32 Q 38 30 40 38 L 35 50 Q 28 45 32 32 Z" class="muscle muscle-shoulders"/>
+                                <path d="M 68 32 Q 62 30 60 38 L 65 50 Q 72 45 68 32 Z" class="muscle muscle-shoulders"/>
+                                <path d="M 28 50 Q 32 65 25 80 L 20 75 Q 22 60 28 50 Z" class="muscle muscle-arms"/>
+                                <path d="M 72 50 Q 68 65 75 80 L 80 75 Q 78 60 72 50 Z" class="muscle muscle-arms"/>
+                                <path d="M 40 90 Q 45 110 40 135 L 30 130 Q 35 110 40 90 Z" class="muscle muscle-legs"/>
+                                <path d="M 60 90 Q 55 110 60 135 L 70 130 Q 65 110 60 90 Z" class="muscle muscle-legs"/>
+                                <path d="M 38 140 Q 45 160 38 180 L 30 180 Q 35 160 38 140 Z" class="muscle muscle-legs"/>
+                                <path d="M 62 140 Q 55 160 62 180 L 70 180 Q 65 160 62 140 Z" class="muscle muscle-legs"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Volume Line Chart -->
+                <div class="glass-panel" style="padding: 20px; min-height:250px; display:flex; flex-direction:column;">
+                    <h3 style="font-size:16px; margin-bottom:15px; color:#fff;">Total Volume Over Time</h3>
+                    <div style="flex:1; position:relative;">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="fitness-modal">
+        <div class="modal-content">
+            <h3>Add Workout Set</h3>
+            <form id="fitness-form">
+                <select id="workout-select" required class="qp-input"></select>
+                <input type="number" id="workout-sets" required value="3" min="1" class="qp-input" placeholder="Sets">
+                <input type="number" id="workout-reps" required value="10" min="1" class="qp-input" placeholder="Reps">
+                <input type="number" id="workout-weight" value="0" min="0" step="0.5" class="qp-input" placeholder="Weight (kg)">
+                <button type="submit" class="qp-btn">Log Set</button>
+                <button type="button" class="qp-btn qp-btn-cancel" onclick="closeModal('fitness-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="body-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3>Log Body Measurements</h3>
+            <form id="body-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <input type="number" id="body-weight" step="0.1" class="qp-input" placeholder="Weight (kg)">
+                    <input type="number" id="body-fat" step="0.1" class="qp-input" placeholder="Body Fat (%)">
+                    <input type="number" id="body-chest" step="0.1" class="qp-input" placeholder="Chest (cm)">
+                    <input type="number" id="body-shoulders" step="0.1" class="qp-input" placeholder="Shoulders (cm)">
+                    <input type="number" id="body-waist" step="0.1" class="qp-input" placeholder="Waist (cm)">
+                    <input type="number" id="body-hips" step="0.1" class="qp-input" placeholder="Hips (cm)">
+                    <input type="number" id="body-arms" step="0.1" class="qp-input" placeholder="Arms (cm)">
+                    <input type="number" id="body-forearms" step="0.1" class="qp-input" placeholder="Forearms (cm)">
+                    <input type="number" id="body-legs" step="0.1" class="qp-input" placeholder="Legs (cm)">
+                    <input type="number" id="body-calves" step="0.1" class="qp-input" placeholder="Calves (cm)">
+                    <input type="number" id="body-neck" step="0.1" class="qp-input" placeholder="Neck (cm)">
+                </div>
+                <button type="submit" class="qp-btn">Save Measurements</button>
+                <button type="button" class="qp-btn qp-btn-cancel" onclick="closeModal('body-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13"></script>
+    <script src="fitness.js?v=13"></script>
+</body>
+</html>
+

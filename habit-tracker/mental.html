@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeOS Mental</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13"></script>
+    <script src="mental.js?v=13" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <header style="margin-bottom: 30px;">
+            <h1 style="font-size:32px; font-weight:800; color:#fff;" data-i18n="mental">Mental</h1>
+            <div style="font-size:14px; color:var(--text-muted);">Track your daily psychological state</div>
+        </header>
+
+        <main class="view-section active responsive-row" style="gap: 20px;">
+            
+            <div style="flex: 1; max-width: 500px;">
+                <div class="glass-panel" style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px;">Today's State</h3>
+                    
+                    <div class="input-group">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Stress Level</span>
+                            <span id="val-stress">5 / 10</span>
+                        </label>
+                        <input type="range" id="slide-stress" min="1" max="10" value="5" class="input-field" style="padding:0; height:4px; margin-top:10px;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Energy</span>
+                            <span id="val-energy">5 / 10</span>
+                        </label>
+                        <input type="range" id="slide-energy" min="1" max="10" value="5" class="input-field" style="padding:0; height:4px; margin-top:10px;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Focus</span>
+                            <span id="val-focus">5 / 10</span>
+                        </label>
+                        <input type="range" id="slide-focus" min="1" max="10" value="5" class="input-field" style="padding:0; height:4px; margin-top:10px;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Confidence</span>
+                            <span id="val-confidence">5 / 10</span>
+                        </label>
+                        <input type="range" id="slide-confidence" min="1" max="10" value="5" class="input-field" style="padding:0; height:4px; margin-top:10px;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Social Battery</span>
+                            <span id="val-social">5 / 10</span>
+                        </label>
+                        <input type="range" id="slide-social" min="1" max="10" value="5" class="input-field" style="padding:0; height:4px; margin-top:10px;">
+                    </div>
+                    
+                    <button class="btn" style="width:100%; margin-top:20px;" onclick="saveMentalState()">Save State</button>
+                </div>
+            </div>
+            
+            <div style="flex: 1;">
+                <div class="glass-panel" style="padding: 30px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 20px;" data-i18n="analysis">AI Correlation Analysis</h3>
+                    <div id="correlation-results" style="font-size:14px; line-height: 1.6; color: var(--text-muted);">
+                        Fetching insights based on your recent sleep and mental data...
+                    </div>
+                </div>
+            </div>
+            
+        </main>
+        
+        <div class="glass-panel" style="margin-top: 30px;">
+            <h3 style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <span data-i18n="mental_state">Mental State History</span>
+            </h3>
+            <div class="qp-grid-container">
+                <table class="qp-grid-table" id="mental-grid">
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

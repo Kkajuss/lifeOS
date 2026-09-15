@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="i18n.js?v=13"></script>
+    <script src="sound.js?v=13"></script>
+    <script src="shared.js?v=13" defer></script>
+    <script src="settings.js?v=13" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=13"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js?v=13"></script>
+    <script src="firebase-sync.js?v=13" defer></script>
+</head>
+<body class="fade-in">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="top-bar"></aside>
+
+    <div class="app-container">
+        <!-- Main Content -->
+        <main class="view-section active" style="flex-direction: column; overflow-y: auto; padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 40px;">
+                <div>
+                    <h2 style="font-size:36px; font-weight:800; text-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 8px; color: #fff;" data-i18n="settings">Settings</h2>
+                    <p style="color: var(--text-muted); font-size: 15px;" data-i18n="settings_desc">Manage your app preferences, language, and data backups.</p>
+                </div>
+                <a href="index.html" class="btn" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); text-decoration: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span data-i18n="back">Back</span>
+                </a>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+                
+                <!-- Language Card -->
+                <div class="glass-panel glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display:flex; align-items:flex-start; gap: 15px; margin-bottom: 24px;">
+                        <div style="background: rgba(14, 165, 233, 0.15); padding: 12px; border-radius: 12px; color: #0ea5e9; flex-shrink: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size:16px; margin:0 0 4px 0; color:#fff; font-weight: 600;" data-i18n="language">Language</h3>
+                            <div style="font-size:13px; color:var(--text-muted); line-height: 1.4;">Select your preferred app language.</div>
+                        </div>
+                    </div>
+                      <select id="lang-select" class="input-field" style="width:100%; cursor: pointer;">
+                          <option value="en">English</option>
+                          <option value="tr">Türkçe</option>
+                          <option value="es">Español</option>
+                          <option value="de">Deutsch</option>
+                      </select>
+                </div>
+
+                <!-- Appearance Card -->
+                <div class="glass-panel glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; grid-column: 1 / -1;">
+                    <div style="display:flex; align-items:flex-start; gap: 15px; margin-bottom: 24px;">
+                        <div style="background: rgba(139, 92, 246, 0.15); padding: 12px; border-radius: 12px; color: #8b5cf6; flex-shrink: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size:16px; margin:0 0 4px 0; color:#fff; font-weight: 600;" data-i18n="appearance">Appearance</h3>
+                            <div style="font-size:13px; color:var(--text-muted); line-height: 1.4;" data-i18n="appearance_desc">Choose a beautiful theme for your application.</div>
+                        </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                        <div style="color:#fff; font-size:14px; font-weight:500;">Theme Mode</div>
+                        <div style="display:flex; background:rgba(0,0,0,0.3); border-radius:20px; padding:4px;">
+                            <button id="btn-theme-dark" onclick="setThemeMode('dark')" style="padding: 6px 12px; border-radius:16px; border:none; background:rgba(0,0,0,0.5); color:#fff; cursor:pointer; font-size:12px; font-weight:600; transition:0.3s;">Dark</button>
+                            <button id="btn-theme-light" onclick="setThemeMode('light')" style="padding: 6px 12px; border-radius:16px; border:none; background:transparent; color:#fff; cursor:pointer; font-size:12px; font-weight:600; transition:0.3s;">Light (Zen)</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;" id="theme-presets">
+                        <button class="theme-preset-btn" data-bg="#050714" data-accent="#00f2fe" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #050714 50%, #00f2fe 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#0d0514" data-accent="#8b5cf6" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #0d0514 50%, #8b5cf6 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#140505" data-accent="#ef4444" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #140505 50%, #ef4444 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#051409" data-accent="#10b981" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #051409 50%, #10b981 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#140a05" data-accent="#f59e0b" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #140a05 50%, #f59e0b 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#1a1a1a" data-accent="#14b8a6" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #1a1a1a 50%, #14b8a6 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#041525" data-accent="#3b82f6" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #041525 50%, #3b82f6 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#1a0b16" data-accent="#f472b6" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #1a0b16 50%, #f472b6 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#121204" data-accent="#eab308" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #121204 50%, #eab308 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#061f1c" data-accent="#14b8a6" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #061f1c 50%, #14b8a6 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#120e17" data-accent="#d8b4fe" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #120e17 50%, #d8b4fe 50%); cursor:pointer; transition: 0.3s;"></button>
+                        <button class="theme-preset-btn" data-bg="#17100b" data-accent="#d97706" style="width:48px; height:48px; border-radius:50%; border: 2px solid transparent; background: linear-gradient(135deg, #17100b 50%, #d97706 50%); cursor:pointer; transition: 0.3s;"></button>
+                    </div>
+                </div>
+                
+                <!-- Export Card -->
+                <div class="glass-panel glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display:flex; align-items:flex-start; gap: 15px; margin-bottom: 24px;">
+                        <div style="background: rgba(16, 185, 129, 0.15); padding: 12px; border-radius: 12px; color: #10b981; flex-shrink: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size:16px; margin:0 0 4px 0; color:#fff; font-weight: 600;" data-i18n="export_data">Export Data</h3>
+                            <div style="font-size:13px; color:var(--text-muted); line-height: 1.4;">Download a local backup of your progress to keep it safe.</div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="exportData()" style="width:100%; justify-content:center; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;">
+                        <span data-i18n="export_data">Export Backup</span>
+                    </button>
+                </div>
+
+                <!-- Import Card -->
+                <div class="glass-panel glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display:flex; align-items:flex-start; gap: 15px; margin-bottom: 24px;">
+                        <div style="background: rgba(245, 158, 11, 0.15); padding: 12px; border-radius: 12px; color: #f59e0b; flex-shrink: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size:16px; margin:0 0 4px 0; color:#fff; font-weight: 600;" data-i18n="import_data">Import Data</h3>
+                            <div style="font-size:13px; color:var(--text-muted); line-height: 1.4;">Restore your habits and tracker data from a backup file.</div>
+                        </div>
+                    </div>
+                    <label class="btn" style="width:100%; display:flex; justify-content:center; cursor:pointer; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #f59e0b;">
+                        <span data-i18n="import_data">Upload Backup</span>
+                        <input type="file" id="import-file" style="display:none;" accept=".json">
+                    </label>
+                </div>
+
+                <!-- Danger Zone Card -->
+                <div class="glass-panel glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <div style="display:flex; align-items:flex-start; gap: 15px; margin-bottom: 24px;">
+                        <div style="background: rgba(239, 68, 68, 0.15); padding: 12px; border-radius: 12px; color: #ef4444; flex-shrink: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size:16px; margin:0 0 4px 0; color:#ef4444; font-weight: 600;" data-i18n="danger_zone">Danger Zone</h3>
+                            <div style="font-size:13px; color:var(--text-muted); line-height: 1.4;" data-i18n="clear_data_desc">This action cannot be undone. This will permanently delete all your tracking data.</div>
+                        </div>
+                    </div>
+                    <button class="btn" style="width:100%; justify-content:center; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; background: rgba(239, 68, 68, 0.1);" onclick="clearAllData()">
+                        <span data-i18n="clear_data">Clear All Data</span>
+                    </button>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+</body>
+</html>
